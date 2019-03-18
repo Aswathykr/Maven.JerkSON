@@ -8,20 +8,19 @@ import java.util.Map.Entry;
 
 public class GroceryReporter {
     private final String originalFileText;
-    private List<Item> itemList;
     private List<ItemRecord> recordList;
 
     public GroceryReporter(String jerksonFileName) {
         this.originalFileText = FileReader.readFile(jerksonFileName);
         ItemParser parser = new ItemParser();
-        itemList = parser.parseItemList(originalFileText);
+        List<Item> itemList = parser.parseItemList(originalFileText);
         recordList = new ArrayList<>();
         for(Item item : itemList){
             ItemRecord itemRecord = null;
             if(item != null) {
                 itemRecord = new ItemRecord(item.getName());
                 if(!recordList.contains(itemRecord)){
-                    itemRecord.format(itemList, item.getName());
+                    itemRecord.populate(itemList, item.getName());
                     recordList.add(itemRecord);
                 }
             }
@@ -57,8 +56,7 @@ public class GroceryReporter {
             return name;
         }
 
-
-        public void format(List<Item> list, String name){
+        public void populate(List<Item> list, String name){
             for(Item item : list) {
                 if(item.getName().equals(name)){
                     itemFrequency ++;
