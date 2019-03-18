@@ -32,7 +32,6 @@ public class GroceryReporter {
     @Override
     public String toString() {
         String result = "";
-
         for(ItemRecord record : recordList){
             result += record;
         }
@@ -41,15 +40,14 @@ public class GroceryReporter {
 
     private class ItemRecord{
         private String name;
-
-
         private Integer itemFrequency;
         private Map<Double, Integer> priceMap;
 
         public Integer getItemFrequency() {
             return itemFrequency;
         }
-       public ItemRecord(String name) {
+
+        public ItemRecord(String name) {
             this.name = name;
             itemFrequency = 0;
             priceMap = new HashMap<>();
@@ -112,12 +110,14 @@ public class GroceryReporter {
             ItemRecord that = (ItemRecord) o;
             return Objects.equals(name, that.name);
         }
-        public String getFormatedName(){
-            return String.format("%7s", Character.toUpperCase(name.charAt(0)) + name.substring(1));
-        }
+
         @Override
         public int hashCode() {
             return Objects.hash(name);
+        }
+
+        public String getFormatedName(){
+            return String.format("%7s", Character.toUpperCase(name.charAt(0)) + name.substring(1));
         }
     }
 }
