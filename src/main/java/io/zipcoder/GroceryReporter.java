@@ -8,33 +8,33 @@ import java.util.Map.Entry;
 
 public class GroceryReporter {
     private final String originalFileText;
-    private List<ItemRecord> recordList;
+    private Map<String, ItemRecord> recordMap;
 
     public GroceryReporter(String jerksonFileName) {
         this.originalFileText = FileReader.readFile(jerksonFileName);
         ItemParser parser = new ItemParser();
         List<Item> itemList = parser.parseItemList(originalFileText);
-        recordList = new ArrayList<>();
+        recordMap = new LinkedHashMap<>();
         for(Item item : itemList){
-            ItemRecord itemRecord = null;
             if(item != null) {
-                itemRecord = new ItemRecord(item.getName());
-                if(!recordList.contains(itemRecord)){
-                    itemRecord.populate(itemList, item.getName());
-                    recordList.add(itemRecord);
-                }
+                ItemRecord itemRecord = new ItemRecord(item.getName());
+                itemRecord = recordMap.getOrDefault(itemRecord.name, new ItemRecord(item.getName()));
+                itemRecord.incrementFrequency();
+                itemRecord.addPrice(item.getPrice());
+                recordMap.put(item.getName(), itemRecord);
             }
-
         }
     }
 
     @Override
     public String toString() {
         String result = "";
-        for(ItemRecord record : recordList){
-            result += record;
+        Set<String> rocordNames = recordMap.keySet();
+        for(String recordName : rocordNames){
+            if(recordName != "Error")
+            result += recordMap.get(recordName);
         }
-        return result;
+        return result += recordMap.get("Error");
     }
 
     private class ItemRecord{
@@ -56,6 +56,19 @@ public class GroceryReporter {
             return name;
         }
 
+        public void incrementFrequency(){
+            itemFrequency++;
+        }
+        public void addPrice(Double price) {
+            Integer frequency = priceMap.getOrDefault(price, null);
+            if(frequency == null){
+                priceMap.put(price, 1);
+            }
+            else {
+                frequency = frequency.intValue() + 1;
+                priceMap.put(price, frequency);
+            }
+        }
         public void populate(List<Item> list, String name){
             for(Item item : list) {
                 if(item.getName().equals(name)){
@@ -74,11 +87,10 @@ public class GroceryReporter {
 
         @Override
         public String toString() {
-            String result = "";
             String priceSeparator = "-------------\t\t-------------\n";
+            String heading = getFormatedName()+"\t\tseen: "+ itemFrequency + " times\n";
+            String result = heading;
             if(!name.equals("Error")) {
-                String heading = "name: "+getFormatedName()+"\t\tseen: "+ itemFrequency + " times\n";
-                result = heading;
                 String separator = "=============\t\t=============\n";
                 result += separator;
                 int index = 0;
@@ -92,11 +104,6 @@ public class GroceryReporter {
                     index++;
                 }
                 result += "\n";
-            }
-            else{
-
-                String heading = name+"\t\t\t\tseen: "+ itemFrequency + " times\n";
-                result = heading;
             }
             return result;
         }
@@ -115,7 +122,12 @@ public class GroceryReporter {
         }
 
         public String getFormatedName(){
-            return String.format("%7s", Character.toUpperCase(name.charAt(0)) + name.substring(1));
+            String result = "Error\t\t";
+            if(!name.equals("Error")) {
+                result = "name: ";
+                result +=String.format("%7s", Character.toUpperCase(name.charAt(0)) + name.substring(1));
+            }
+            return result;
         }
     }
 }
